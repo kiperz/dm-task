@@ -2,8 +2,10 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Action\NotFoundAction;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use App\Repository\CommentRepository;
 use DateTime;
 use Ramsey\Uuid\Doctrine\UuidGenerator;
@@ -14,8 +16,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ApiResource(
- *     normalizationContext={"groups"={"read"}},
- *     denormalizationContext={"groups"={"write"}},
+ *     normalizationContext={"groups"={"comment:read"}},
+ *     denormalizationContext={"groups"={"comment:write"}},
  *     collectionOperations={"GET", "POST"},
  *     itemOperations={
  *         "GET"={
@@ -24,9 +26,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  *             "output"=false
  *          },
  *     },
- *     attributes={"order"={"created_at": "ASC"}}
+ *     attributes={"order"={"created_at": "DESC"}}
  * )
  * @ORM\Entity(repositoryClass=CommentRepository::class)
+ * @ApiFilter(SearchFilter::class, properties={"author.id": "exact"})
  */
 class Comment
 {
@@ -35,14 +38,14 @@ class Comment
      * @ORM\GeneratedValue(strategy="CUSTOM")
      * @ORM\Column(type="uuid", unique=true)
      * @ORM\CustomIdGenerator(class=UuidGenerator::class)
-     * @Groups({"read"})
+     * @Groups({"comment:read"})
      */
     private $id;
 
     /**
      * @ORM\ManyToOne(targetEntity=Author::class, inversedBy="comments", cascade={"persist"})
      * @ORM\JoinColumn(nullable=false)
-     * @Groups({"read", "write"})
+     * @Groups({"comment:read", "comment:write"})
      */
     private $author;
 
@@ -50,13 +53,19 @@ class Comment
      * @ORM\Column(type="text")
      * @Assert\NotBlank()
      * @Assert\Length(max="1000", min="1")
-     * @Groups({"read", "write"})
+     * @Groups({"comment:read", "comment:write"})
      */
     private $content;
 
     /**
+     * @ORM\Column(type="text")
+     * @Groups({"comment:read", "comment:write"})
+     */
+    private $nick;
+
+    /**
      * @ORM\Column(type="datetime")
-     * @Groups({"read"})
+     * @Groups({"comment:read"})
      */
     private $created_at;
 
@@ -90,6 +99,18 @@ class Comment
     public function setContent(string $content): self
     {
         $this->content = $content;
+
+        return $this;
+    }
+
+    public function getNick(): ?string
+    {
+        return $this->nick;
+    }
+
+    public function setNick(string $nick): self
+    {
+        $this->nick = $nick;
 
         return $this;
     }

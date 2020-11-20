@@ -4,24 +4,26 @@ namespace App\Interfaces\Http\Controller;
 
 use App\Domain\Comments\Command\CreateNewCommentCommand;
 use App\Domain\Comments\Query\GetCommentsListQuery;
-use App\Domain\Comments\Request\CreateCommentRequest;
+use App\Infrastructure\Comments\Form\CreateCommentType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 class IndexController extends AbstractController {
     /**
-     * @Route("/", name="comments_index", methods={"GET"})
+     * @Route("/", name="comments_index", methods={"GET", "POST"})
      */
-    public function index(GetCommentsListQuery $getCommentsListQuery) {
-        $comments = $getCommentsListQuery->execute();
-        return $this->render('base.html.twig', ['comments' => $comments]);
+    public function index(Request $request, GetCommentsListQuery $getCommentsListQuery, CreateNewCommentCommand $createNewCommentCommand) {
+        $authorId = $request->get('authorId', null);
+        $page = $request->get('page', 1);
+        $form = $this->createForm(CreateCommentType::class);
+        $form->handleRequest($request);
+        if($form->isSubmitted() && $form->isValid()) {
+            $formData = $form->getData();
+            $createNewCommentCommand->execute($formData);
+        }
+        $comments = $getCommentsListQuery->execute($page, $authorId);
+        return $this->render('base.html.twig', ['page' => $page, 'authorId' => $authorId, 'comments' => $comments, 'form' => $form->createView()]);
     }
 
-    /**
-     * @Route("/", name="comments_index_post", methods={"POST"})
-     */
-    public function postComment(CreateCommentRequest $request, CreateNewCommentCommand $createNewCommentCommand) {
-        $createNewCommentCommand->execute($request->toDto());
-        return $this->redirect('/');
-    }
 }

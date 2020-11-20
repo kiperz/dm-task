@@ -4,12 +4,14 @@ namespace App\Domain\Comments\DataTransferObject;
 class CommentDto
 {
     private string $content;
+    private string $nick;
     private AuthorDto $author;
     private ?\DateTime $created_at;
 
-    public function __construct(string $content, ?\DateTime $created_at, AuthorDto $author)
+    public function __construct(string $content, ?\DateTime $created_at, string $nick, AuthorDto $author)
     {
         $this->content = $content;
+        $this->nick = $nick;
         $this->author = $author;
         $this->created_at = $created_at;
     }
@@ -17,6 +19,11 @@ class CommentDto
     public function getContent(): string
     {
         return $this->content;
+    }
+
+    public function getNick(): string
+    {
+        return $this->nick;
     }
 
     public function getAuthor(): AuthorDto
@@ -36,7 +43,8 @@ class CommentDto
     {
         return [
             "author" => $this->author->toArray(),
-            "content" => $this->content
+            "content" => $this->content,
+            "nick" => $this->nick
         ];
     }
 }

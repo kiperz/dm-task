@@ -18,17 +18,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ApiResource(
- *     normalizationContext={"groups"={"read"}},
- *     denormalizationContext={"groups"={"write"}},
- *     collectionOperations={},
- *     itemOperations={
- *          "GET"={
- *             "controller"=NotFoundAction::class,
- *             "read"=false,
- *             "output"=false,
- *             "input"=false
- *          },
- *     }
+ *     denormalizationContext={"groups"={"author:write"}},
+ *     normalizationContext={"groups"={"author:read"}},
+ *     collectionOperations={"GET", "POST"},
+ *     itemOperations={"GET"}
  * )
  * @ORM\Entity(repositoryClass=AuthorRepository::class)
  * @ApiFilter(SearchFilter::class, properties={"email": "exact", "id": "exact"})
@@ -40,31 +33,26 @@ class Author
      * @ORM\GeneratedValue(strategy="CUSTOM")
      * @ORM\Column(type="uuid", unique=true)
      * @ORM\CustomIdGenerator(class=UuidGenerator::class)
-     * @Groups({"read"})
+     * @Groups({"author:read", "comment:read"})
      */
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
-     * @Groups({"read", "write"})
-     */
-    private $nickname;
-
-    /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Groups({"read", "write"})
+     * @Groups({"author:read", "author:write", "comment:read"})
      * @Assert\Email()
      */
     private $email;
 
     /**
      * @ORM\Column(type="datetime")
-     * @Groups({"read"})
+     * @Groups({"author:read"})
      */
     private $created_at;
 
     /**
      * @ORM\OneToMany(targetEntity=Comment::class, mappedBy="author")
+     * @Groups({"none"})
      */
     private $comments;
 
@@ -77,18 +65,6 @@ class Author
     public function getId(): ?UuidInterface
     {
         return $this->id;
-    }
-
-    public function getNickname(): ?string
-    {
-        return $this->nickname;
-    }
-
-    public function setNickname(string $nickname): self
-    {
-        $this->nickname = $nickname;
-
-        return $this;
     }
 
     public function getEmail(): ?string

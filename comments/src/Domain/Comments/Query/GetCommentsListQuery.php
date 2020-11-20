@@ -18,9 +18,8 @@ class GetCommentsListQuery
     /**
      * @return array|CommentDto[]
      */
-    public function execute(): array {
-        $commentsArr = $this->commentsApiClient->getComments();
-
+    public function execute(int $page, ?string $authorId): array {
+        $commentsArr = $this->commentsApiClient->getComments($page, $authorId);
         return $this->commentsHydrator->hydrateComments($commentsArr);
     }
 }

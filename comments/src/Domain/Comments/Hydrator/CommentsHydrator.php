@@ -15,12 +15,12 @@ class CommentsHydrator
      {
          return function(array $elem): CommentDto
          {
-             return new CommentDto($elem['content'], new \DateTime($elem['created_at']), $this->hydrateAuthor($elem['author']));
+             return new CommentDto($elem['content'], new \DateTime($elem['created_at']), $elem['nick'], $this->hydrateAuthor($elem['author']));
          };
     }
 
     private function hydrateAuthor(array $author): AuthorDto
     {
-        return new AuthorDto($author['email'], $author['nickname']);
+        return new AuthorDto($author['id'], $author['email']);
     }
 }

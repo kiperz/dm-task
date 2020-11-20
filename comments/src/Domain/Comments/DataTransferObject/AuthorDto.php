@@ -3,13 +3,13 @@ namespace App\Domain\Comments\DataTransferObject;
 
 class AuthorDto
 {
+    private string $id;
     private string $email;
-    private string $nickname;
 
-    public function __construct(string $email, string $nickname)
+    public function __construct(string $id, string $email)
     {
+        $this->id = $id;
         $this->email = $email;
-        $this->nickname = $nickname;
     }
 
     /**
@@ -23,16 +23,15 @@ class AuthorDto
     /**
      * @return string
      */
-    public function getNickname(): string
+    public function getId(): string
     {
-        return $this->nickname;
+        return $this->id;
     }
 
     public function toArray(): array
     {
         return [
-            "email" => $this->email,
-            "nickname" => $this->nickname
+            "email" => $this->email
         ];
     }
 }

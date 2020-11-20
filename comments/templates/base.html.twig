@@ -17,23 +17,11 @@
     <body>
         <div class="main">
             {% for comment in comments %}
-                <div><b>{{ comment.author.nickname }}</b>(<i>{{ comment.author.email }}</i>) dnia {{ comment.createdAt|date("d.m.Y H:i") }} napisał:<br>{{ comment.content|nl2br }}  </div><br>
-            {% endfor %}<br><br><br>
-            <form action="/" method="post">
-                <label>
-                    Treść komentarza:<br>
-                    <textarea cols="80" rows="5" name="content"></textarea>
-                </label><br>
-                <label>
-                    Nick:<br>
-                    <input type="text" name="authorNick"/>
-                </label><br>
-                <label>
-                    E-mail:<br>
-                    <input type="text" name="authorEmail"/>
-                </label><br>
-                <button type="submit">Wyślij</button>
-            </form>
+            <div><b><a href="/?authorId={{ comment.author.id }}">{{ comment.nick }}</a></b>({{ comment.author.email}}) dnia {{ comment.createdAt|date("d.m.Y H:i") }} napisał:<br>{{ comment.content|nl2br }}  </div><br>
+            {% endfor %}<br>
+            {% if page > 1 %}<a href="/?page={{ page-1 }}{% if authorId %}&authorId={{ authorId }}{% endif %}">Poprzednia</a>&nbsp;{% endif %}<a href="/?page={{ page+1 }}{% if authorId %}&authorId={{ authorId }}{% endif %}">Następna</a><br>
+            {% if authorId %}<a href="/">Powrót do strony głównej</a><br>{% endif %}
+            {{ form(form) }}
         </div>
         {% block body %}{% endblock %}
         {% block javascripts %}{% endblock %}
