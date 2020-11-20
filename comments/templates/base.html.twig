@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Welcome!{% endblock %}</title>
+        {% block stylesheets %}{% endblock %}
+        <style>
+            .wrapper {
+                width: 100%;
+            }
+            .main {
+                width: 50%;
+                margin: 50px auto;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="main">
+            {% for comment in comments %}
+                <div><b>{{ comment.author.nickname }}</b>(<i>{{ comment.author.email }}</i>) dnia {{ comment.createdAt|date("d.m.Y H:i") }} napisał:<br>{{ comment.content|nl2br }}  </div><br>
+            {% endfor %}<br><br><br>
+            <form action="/" method="post">
+                <label>
+                    Treść komentarza:<br>
+                    <textarea cols="80" rows="5" name="content"></textarea>
+                </label><br>
+                <label>
+                    Nick:<br>
+                    <input type="text" name="authorNick"/>
+                </label><br>
+                <label>
+                    E-mail:<br>
+                    <input type="text" name="authorEmail"/>
+                </label><br>
+                <button type="submit">Wyślij</button>
+            </form>
+        </div>
+        {% block body %}{% endblock %}
+        {% block javascripts %}{% endblock %}
+    </body>
+</html>

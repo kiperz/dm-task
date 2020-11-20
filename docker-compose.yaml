@@ -1,0 +1,72 @@
+version: '3.7'
+
+services:
+
+  mariadb:
+    build: ./docker/mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+   # volumes:
+    #  - ./docker/data/mariadb:/var/lib/mysql:cached
+
+  php-comments-api:
+    build:
+      context: .
+      dockerfile: ./docker/php-fpm/Dockerfile
+      args:
+        - PROJECT_NAME=comments-api
+    environment:
+      - DATABASE_URL=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mariadb:3306/${MYSQL_DATABASE}?serverVersion=mariadb-10.4.17
+    volumes:
+      - ./comments-api/src:/var/www/src:cached
+      - ./comments-api/bin:/var/www/bin:cached
+      - ./comments-api/config:/var/www/config:cached
+      - ./comments-api/migrations:/var/www/migrations:cached
+      - ./comments-api/public:/var/www/public:cached
+    links:
+      - mariadb
+
+  nginx-comments-api:
+    build:
+      context: ./docker/nginx/
+      dockerfile: Dockerfile
+      args:
+        - CONF_FILE=nginx-comments-api.conf
+    ports:
+      - '81:80'
+    links:
+      - php-comments-api
+    volumes:
+      - ./comments-api/public:/var/www/public:cached
+
+  php-comments-app:
+    build:
+      context: .
+      dockerfile: ./docker/php-fpm/Dockerfile
+      args:
+        - PROJECT_NAME=comments
+    environment:
+      - COMMENTS_API_URL=http://nginx-comments-api
+    volumes:
+      - ./comments/src:/var/www/src:cached
+      - ./comments/bin:/var/www/bin:cached
+      - ./comments/config:/var/www/config:cached
+      - ./comments/templates:/var/www/templates:cached
+      - ./comments/public:/var/www/public:cached
+      - ./comments/tests:/var/www/tests:cached
+
+  nginx-comments-app:
+    build:
+      context: ./docker/nginx/
+      dockerfile: Dockerfile
+      args:
+        - CONF_FILE=nginx-comments-app.conf
+    ports:
+      - '80:80'
+    links:
+      - php-comments-app
+    #volumes:
+      #- ./comments/public:/var/www/public:cached
